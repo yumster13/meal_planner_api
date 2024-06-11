@@ -5,7 +5,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-
+from django.contrib.auth.views import LoginView as DjangoLoginView
+from django.contrib.auth import login
+from django.http import JsonResponse
+from django.contrib.auth import authenticate, login,logout
+from django.middleware.csrf import get_token
 from rest_framework import generics
 
 class RecipeListCreate(generics.ListCreateAPIView):
@@ -83,6 +87,48 @@ class IngredientQuant(generics.ListAPIView):
         anim =  RecipeXEngredient.objects.filter(recipe__id=recipe_id,age=age,ingredient__id = ingredient__id).values('quantity').distinct()
         leaders =  RecipeXEngredient.objects.filter(recipe__id=recipe_id,age=Ages.GG,ingredient__id = ingredient__id).values('quantity').distinct()
         return JsonResponse({'anim':anim[0]['quantity'],'leaders':leaders[0]['quantity']})
+
+from rest_framework import generics
+from django.http import JsonResponse
+
+class IngredientSearch(generics.ListAPIView):
+    serializer_class = IngredientSerializerCategory
+
+    def get(self, request, *args, **kwargs):
+        name = request.data['ingredient']
+        ingredients = Ingredient.objects.filter(name__icontains=name)
+        ingredient_dict = {}
+        for ingredient in ingredients:
+            seasons = ingredient.season.values('name')  # Assuming 'name' is a field in Season model
+            seasons_list = []
+            for season in seasons:
+                seasons_list.append(season)
+            ingredient_dict[ingredient.name] = {
+                'unit': ingredient.mesurement,
+                'cat': ingredient.category.name if ingredient.category else None,
+                'avg_price': ingredient.avg_price,
+                'seasons': seasons_list
+            }
+        print(ingredient_dict)
+        return JsonResponse({'ingredient_dict': ingredient_dict})
+
+class RecipeSearch(generics.ListAPIView):
+    serializer_class = RecipeSerializer
+
+    def get(self, request, *args, **kwargs):
+        name = request.data['recipe']
+        recipes = Recipe.objects.prefetch_related('tags').filter(name__icontains=name).all()
+        recipe_dict = {}
+        print(recipes)
+        for recipe in recipes:
+            recipe_dict[recipe.name] = {
+            'prairie': recipe.prairie,
+            'tags': recipe.tags.name,
+            'avg_price': 0  # You can update this with actual logic if needed
+            }
+        print(recipe_dict)
+        return JsonResponse({'recipe_dict': recipe_dict})
+
     
 from django.contrib.auth.models import User
 from rest_framework import serializers, viewsets
@@ -114,17 +160,6 @@ class CustomAuthToken(ObtainAuthToken):
             'user_id': user.pk,
             'email': user.email
         })
-
-from django.contrib.auth.views import LoginView as DjangoLoginView
-from django.contrib.auth import login
-from django.urls import path
-from django.http import JsonResponse
-from django.contrib.auth import authenticate, login
-
-from django.http import JsonResponse
-from django.contrib.auth import authenticate, login,logout
-from django.http import JsonResponse
-from django.middleware.csrf import get_token
 
 def get_csrf_token(request):
     csrf_token = get_token(request)

@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-umf62aps(86c0(k)mdlee(bam!2in^dsgnt@sr%ep9(!7ve))a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['www.api.campeat.be']
 
 
 # Application definition
@@ -95,9 +95,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mealplanner_api',
-        'USER': 'user',
-        'PASSWORD': 'user_local',
-        'HOST': '127.0.0.1',
+        'USER': 'mealplanner',
+        'PASSWORD': 'sOY6xkos6UPo8d9JzLxuFPVyF#LnuF',
+        'HOST': 'localhost',
         'PORT': '3306',
     }
 }
@@ -137,6 +137,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+STATIC_ROOT = BASE_DIR / 'staticproduction'
+
 STATIC_URL = 'static/'
 
 # Default primary key field type
@@ -147,7 +149,7 @@ VERIFY_SSL = False
 
 
 CORS_ALLOWED_ORIGINS = [
-    "https://localhost:8000",
+    "https://www.campeat.be",
 ]
 
 
@@ -158,7 +160,7 @@ REST_FRAMEWORK = {
 }
 
 OAUTH2_PROVIDER = {
-    'ACCESS_TOKEN_EXPIRE_SECONDS': 50,
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 3600,
     'REFRESH_TOKEN_EXPIRE_SECONDS': 86400,
     'ROTATE_REFRESH_TOKEN': True,
 }
